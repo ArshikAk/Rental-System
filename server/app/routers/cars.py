@@ -1,25 +1,33 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.database import get_db
+from typing import List
 from app import models, schemas
+from app.database import get_db
+from datetime import datetime
 
-router = APIRouter(prefix="/cars", tags=["Cars"])
+router = APIRouter(prefix="/cars", tags=["cars"])
 
-@router.post("/", response_model=schemas.Car)
-def create_car(car: schemas.CarCreate, db: Session = Depends(get_db)):
-    db_car = models.Car(**car.dict())
-    db.add(db_car)
+@router.post("/", response_model=schemas.CarResponse, status_code=status.HTTP_201_CREATED)
+def create_car(car_in: schemas.CarCreate, db: Session = Depends(get_db)):
+    car = models.Car(
+        make=car_in.make,
+        model=car_in.model,
+        year=car_in.year,
+        daily_rate=car_in.daily_rate,
+        available=True
+    )
+    db.add(car)
     db.commit()
-    db.refresh(db_car)
-    return db_car
+    db.refresh(car)
+    return car
 
-@router.get("/", response_model=list[schemas.Car])
-def get_cars(db: Session = Depends(get_db)):
+@router.get("/", response_model=List[schemas.CarResponse])
+def list_cars(db: Session = Depends(get_db)):
     return db.query(models.Car).all()
 
-@router.get("/{car_id}", response_model=schemas.Car)
+@router.get("/{car_id}", response_model=schemas.CarResponse)
 def get_car(car_id: int, db: Session = Depends(get_db)):
     car = db.query(models.Car).filter(models.Car.id == car_id).first()
     if not car:
-        raise HTTPException(status_code=404, detail="Car not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Car not found")
     return car

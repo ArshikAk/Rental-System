@@ -12,7 +12,7 @@ class Car(Base):
     daily_rate = Column(Float, nullable=False)
     available = Column(Boolean, default=True)
 
-    rentals = relationship("Rental", back_populates="car")
+    rentals = relationship("Rental", back_populates="car", cascade="all, delete-orphan")
 
 
 class Rental(Base):

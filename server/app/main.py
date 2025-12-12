@@ -1,15 +1,16 @@
 from fastapi import FastAPI
+from app.database import Base, engine
 from app.routers import cars, rentals
-from app.database import engine, Base
 
-
+# Create DB tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Car Rental API")
-
-app.include_router(cars.router)
-app.include_router(rentals.router)
+app = FastAPI(title="Car Rental System API")
 
 @app.get("/")
-def root():
-    return {"message": "Car Rental API is running"}
+def home():
+    return {"message": "Car Rental API is running!"}
+
+# Include Routers
+app.include_router(cars.router)
+app.include_router(rentals.router)
