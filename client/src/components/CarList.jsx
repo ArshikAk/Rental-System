@@ -6,8 +6,10 @@ export default function CarList() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/cars")
-      .then((res) => setCars(res.data))
+      .get("http://127.0.0.1:8000/cars/")
+      .then((res) => {
+        console.log(res.data)
+        setCars(res.data)})
       .catch((err) => console.error(err));
   }, []);
 
@@ -21,7 +23,7 @@ export default function CarList() {
             <p>
               <strong>{car.make} {car.model}</strong> ({car.year})
             </p>
-            <p>Price per day: ₹{car.price_per_day}</p>
+            <p>Price per day: ₹{car.daily_rate}</p>
           </div>
         ))
       )}

@@ -5,10 +5,10 @@ export default function CancelRentalForm() {
   const [rentalId, setRentalId] = useState("");
   const [rentals, setRentals] = useState([]);
 
-  // Fetch all active rentals
+
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/rental/active")
+      .get("http://localhost:8000/rentals/active")
       .then((res) => setRentals(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -20,10 +20,10 @@ export default function CancelRentalForm() {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/rental/${rentalId}`);
+      await axios.delete(`http://localhost:8000/rentals/${rentalId}`); 
       alert("Rental cancelled successfully!");
-      // remove cancelled rental from the dropdown
-      setRentals(rentals.filter((r) => r._id !== rentalId));
+      
+      setRentals(rentals.filter((r) => r.id !== Number(rentalId)));
       setRentalId("");
     } catch (err) {
       alert(err.response?.data?.detail || "Error cancelling rental");
@@ -39,8 +39,8 @@ export default function CancelRentalForm() {
       >
         <option value="">Select an active rental</option>
         {rentals.map((r) => (
-          <option key={r._id} value={r._id}>
-            Rental #{r._id} - Car ID: {r.car_id} ({r.renter_name})
+          <option key={r.id} value={r.id}>
+            Rental #{r.id} - Car ID: {r.car_id} ({r.user_name})
           </option>
         ))}
       </select>

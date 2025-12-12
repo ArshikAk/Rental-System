@@ -37,27 +37,27 @@ def any_car_available_for_period(db: Session, start_dt: datetime, end_dt: dateti
 
 @router.post("/{car_id}/rent", response_model=schemas.RentalResponse, status_code=status.HTTP_201_CREATED)
 def rent_car(car_id: int, rental_in: schemas.RentalCreate, db: Session = Depends(get_db)):
-    # validate car exists
+    
     car = db.query(models.Car).filter(models.Car.id == car_id).first()
     if not car:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Car not found")
 
-    # parse & validate dates (pydantic already yields datetime objects)
+   
     start_dt = rental_in.start_date
     end_dt = rental_in.end_date
     if end_dt < start_dt:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="end_date must be >= start_date")
 
-    # 1) Check this specific car for overlapping active rentals
+    
     overlapping = rentals_overlap_query(db.query(models.Rental), car_id, start_dt, end_dt).all()
     if overlapping:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Car is already rented for the specified dates")
 
-    # 2) Trick logic: if ALL cars are rented (i.e. no car free for the requested period), reject
+    
     if not any_car_available_for_period(db, start_dt, end_dt):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No cars are available for the specified dates")
 
-    # Create rental
+    
     rental = models.Rental(
         car_id=car_id,
         user_name=rental_in.user_name,
@@ -76,7 +76,7 @@ def cancel_rental(rental_id: int, db: Session = Depends(get_db)):
     if not rental or not rental.active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Active rental not found")
 
-    # cancel the rental (mark inactive) — do not delete, keep history
+    
     rental.active = False
     db.add(rental)
     db.commit()

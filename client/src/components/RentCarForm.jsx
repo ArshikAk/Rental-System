@@ -4,8 +4,7 @@ import axios from "axios";
 export default function RentCarForm() {
   const [form, setForm] = useState({
     car_id: "",
-    renter_name: "",
-    renter_email: "",
+    user_name: "",
     start_date: "",
     end_date: "",
   });
@@ -14,7 +13,7 @@ export default function RentCarForm() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/cars")
+      .get("http://localhost:8000/cars/")
       .then((res) => setCars(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -31,11 +30,17 @@ export default function RentCarForm() {
     }
 
     try {
-      const payload = { ...form, car_id: Number(form.car_id) };
+      const payload = { 
+        user_name: form.user_name,
+        start_date: form.start_date,
+        end_date: form.end_date,
+      };
+
       const res = await axios.post(
-        `http://localhost:5000/api/rental/${form.car_id}/rent`,
+        `http://localhost:8000/rentals/${form.car_id}/rent`,
         payload
       );
+
       alert("Car rented successfully!");
       console.log(res.data);
     } catch (err) {
@@ -54,23 +59,15 @@ export default function RentCarForm() {
         <option value="">Select a car</option>
         {cars.map((car) => (
           <option key={car.id} value={car.id}>
-            {car.make} {car.model} ({car.year}) - ₹{car.price_per_day}/day
+            {car.make} {car.model} ({car.year}) - ₹{car.daily_rate}/day
           </option>
         ))}
       </select>
 
       <input
         type="text"
-        name="renter_name"
+        name="user_name"
         placeholder="Your Name"
-        onChange={handleChange}
-        className="w-full border p-2 rounded"
-      />
-
-      <input
-        type="email"
-        name="renter_email"
-        placeholder="Your Email"
         onChange={handleChange}
         className="w-full border p-2 rounded"
       />
